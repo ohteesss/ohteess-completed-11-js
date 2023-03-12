@@ -70,14 +70,38 @@ const displayMovements = function (movements) {
        <div class="movements__type movements__type--${depOrWith}">${
       i + 1
     } ${depOrWith}</div>
-       <div class="movements__value">${movement}</div>
+       <div class="movements__value">${movement}€</div>
      </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
-displayMovements(account1.movements);
-console.log(containerMovements.innerHTML);
-
+// displayMovements(account1.movements);
+// console.log(containerMovements.innerHTML);
+const calcDisplayBalance = function (movements) {
+  labelBalance.textContent = `${movements.reduce(
+    (acc, mov) => acc + mov,
+    0
+  )} €`;
+};
+// calcDisplayBalance(account1.movements);
+const calcDisplaySummary = function (movements) {
+  const interestRate = 1.2 / 100;
+  const incomes = movements
+    .filter(mov => mov > 0)
+    .reduce((acc, cur) => acc + cur, 0);
+  labelSumIn.textContent = `${incomes}€`;
+  const expenses = movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(expenses)}€`;
+  const interest = movements
+    .filter(mov => mov > 0)
+    .map(mov => mov * interestRate)
+    .filter(mov => mov > 1)
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = `${interest}€ `;
+};
+// calcDisplaySummary(account1.movements);
 const user = 'Steven Thomas Williams';
 // const userName = user
 //   .split(' ')
@@ -95,9 +119,38 @@ const createUsername = function (accs) {
       .join('');
   });
 };
-createUsername(accounts);
-console.log(account1);
+// createUsername(accounts);
+// console.log(account1);
 // console.log(useAcct1);
+
+// Implementing Login
+// Event handler
+let currentAccount;
+btnLogin.addEventListener('click', function (e) {
+  e.preventDefault();
+  console.log(inputLoginUsername);
+
+  currentAccount = accounts.find(
+    acc => acc.userName === inputLoginUsername.value
+  );
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // Display UI and welcome message
+    labelWelcome.textContent = `Welcome Back, ${currentAccount.owner
+      .split(' ')
+      .at(0)} `;
+    containerApp.style.opacity = 100;
+    // Clear input fields
+    inputLoginUsername.textContent = inputLoginPin.textContent = '';
+    // calculate summary
+    calcDisplaySummary(currentAccount.movements);
+    // caculate balance
+    calcDisplayBalance(currentAccount.movements);
+    // display movements
+    displayMovements(currentAccount.movements);
+  }
+
+  console.log(currentAccount);
+});
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -250,8 +303,58 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 // console.log(deposits);
 
 // REDUCE Method
-const balance = movements.reduce(function () {});
+// REDUCE
+// const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+// const balance = movements.reduce(function (acc, cur, i, arr) {
+//   console.log(`Iteration ${i}: ${acc}`);
+//   return acc + cur;
+// }, 0);
+// const balance = movements.reduce((acc, cur, i, arr) => acc + cur, 0);
+// console.log(balance);
+// let sum = 0;
+// for (const mov of movements) {
+//   sum += mov;
+// }
+// console.log(sum);
 
+// const maxmovements = movements.reduce(
+//   (acc, cur) => {
+//     if (acc > cur) return acc;
+//     else return cur;
+//   },
+
+//   movements[0]
+// );
+// console.log(maxmovements);
+// /////////////////////////////////////////////////
+// console.log(balance);
+
+// The Magic of Chaining Method
+
+// PIPELINE
+// movements
+//   .filter(mov => mov > 0)
+//   .map(mov => mov * eurToUsd)
+//   .reduce((acc, cur) => acc + cur, 0);
+
+// The Find method
+// const firstWithdrawla = movements.find(mov => mov < 0);
+// console.log(movements);
+// console.log(firstWithdrawla);
+// let firstWithdrawl = [];
+// for (const mov of movements) {
+//   if (mov < 0) firstWithdrawl.push(mov);
+// }
+// console.log(firstWithdrawl.at(0));
+
+// const account = accounts.find(acc => acc.userName == 'js');
+// const account = accounts.find(acc => acc.owner == 'Jessica Davis');
+// console.log(account);
+// let account;
+// for (const ccs of accounts) {
+//   if (ccs.owner === 'Jessica Davis') account = ccs;
+// }
+// console.log(account);
 // Coding Challenge 1
 // Julia and Kate are doing a study on dogs. So each of them asked 5 dog owners
 // about their dog's age, and stored the data into an array (one array for each). For
@@ -298,6 +401,47 @@ const balance = movements.reduce(function () {});
 //   // getCode(arr2);
 // };
 // checkDogs(dogsJulia, dogsKate);
+// Coding Challenge 2
+// Let's go back to Julia and Kate's study about dogs. This time, they want to convert
+// dog ages to human ages and calculate the average age of the dogs in their study.
+// Your tasks:
+// Create a function 'calcAverageHumanAge', which accepts an arrays of dog's
+// ages ('ages'), and does the following things in order:
+// 1. Calculate the dog age in human years using the following formula: if the dog is
+// <= 2 years old, humanAge = 2 * dogAge. If the dog is > 2 years old,
+// humanAge = 16 + dogAge * 4
+// 2. Exclude all dogs that are less than 18 human years old (which is the same as
+// keeping dogs that are at least 18 years old)
+// 3. Calculate the average human age of all adult dogs (you should already know
+// from other challenges how we calculate averages 😉)
+// 4. Run the function for both test datasets
+// Test data:
+// § Data 1: [5, 2, 4, 1, 15, 8, 3]
+// § Data 2: [16, 6, 10, 5, 6, 1, 4]
+// let humanAge;
+// const calcAverageHumanAge = function (ages) {
+//   //   humanAge = age <= 2 ? age.map(ag => ag * 2) : age.map(ag => 16 + ag * 4);
+//   // const humanAge = ages.map(ag => (ag <= 2 ? ag * 2 : 16 + ag * 4));
+//   // const adultsAge = humanAge.filter(age => age >= 18);
+//   // const averageAge =
+//   //   adultsAge.reduce((acc, cur) => acc + cur, 0) / adultsAge.length;
+//   // const averageAge = humanAge
+//   //   .filter(age => age >= 18)
+//   //   .reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+//   return ages
+//     .map(ag => (ag <= 2 ? ag * 2 : 16 + ag * 4))
+//     .filter(age => age >= 18)
+//     .reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+
+//   // return averageAge;
+//   // console.log(humanAge);
+//   // ages.forEach(function (age) {
+//   // });
+// };
+
+// const avg1 = calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]);
+// const avg2 = calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]);
+// console.log(avg1, avg2);
 
 // Codewars
 // spinWords( "Hey fellow warriors" ) => returns "Hey wollef sroirraw"
@@ -315,25 +459,25 @@ const balance = movements.reduce(function () {});
 //   });
 //   return empArr.join(' ');
 // }
-function delethNth(arr, n) {
-  const setArr = new Set(arr).split('');
-}
-function countoccurences(arr, x) {
-  return arr.filter(ar => ar === x).length;
-}
-console.log(countoccurences([1, 2, 3, 4, 4, 5, 4], 4));
-function isIsogram(str) {
-  const out = str.toLowerCase().split('');
-  for (let i = 0; i < out.length; i++) {
-    console.log(`---Testing ${i}`);
-    for (let j = i + 1; j < out.length; j++) {
-      console.log(out[i], out[j]);
-      if (out[i] === out[j]) return false;
-    }
-  }
-  return true;
-}
-console.log(isIsogram('moose'));
+// function delethNth(arr, n) {
+//   const setArr = new Set(arr).split('');
+// }
+// function countoccurences(arr, x) {
+//   return arr.filter(ar => ar === x).length;
+// }
+// console.log(countoccurences([1, 2, 3, 4, 4, 5, 4], 4));
+// function isIsogram(str) {
+//   const out = str.toLowerCase().split('');
+//   for (let i = 0; i < out.length; i++) {
+//     console.log(`---Testing ${i}`);
+//     for (let j = i + 1; j < out.length; j++) {
+//       console.log(out[i], out[j]);
+//       if (out[i] === out[j]) return false;
+//     }
+//   }
+//   return true;
+// }
+// console.log(isIsogram('moose'));
 //   // console.log(out);
 //   // const o1 = out[0];
 //   // for (const [i, o] of out.entries()) {
@@ -359,17 +503,15 @@ console.log(isIsogram('moose'));
 // }
 // console.log(spinWords('Olu Wa tobiio num'));
 
-// btnLogin.addEventListener(
-//   'click',
-//   function (inputLoginUsername, inputLoginPin) {
-//     for (const account of accounts) {
-//       if (
-//         inputLoginUsername.value === account.owner &&
-//         inputLoginPin.value === String(account.value)
-//       ) {
-//         document.querySelector('.app').style.opacity = '100';
-//         console.log('working');
-//       }
+// btnLogin.addEventListener('click', function (e) {
+//   e.preventDefault();
+//   for (const account of accounts) {
+//     if (
+//       inputLoginUsername.value === account.userName &&
+//       inputLoginPin.value === String(account.pin)
+//     ) {
+//       document.querySelector('.app').style.opacity = '100';
+//       console.log('working');
 //     }
 //   }
-// );
+// });
